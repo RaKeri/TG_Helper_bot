@@ -1,0 +1,15 @@
+2024-10-28 15:50:11,584 - DEBUG - Запущено логирование в основном файле
+2024-10-28 15:55:41,817 - ERROR - [!] Ошибка Chat admin privileges are required to do that in the specified chat (for example, to send a message in a channel which is not yours), or invalid permissions used for the channel or group (caused by SendMessageRequest)
+2024-10-28 15:56:21,537 - ERROR - [!] Ошибка Chat admin privileges are required to do that in the specified chat (for example, to send a message in a channel which is not yours), or invalid permissions used for the channel or group (caused by SendMediaRequest)
+2024-10-28 16:10:16,925 - ERROR - [!] Ошибка Chat admin privileges are required to do that in the specified chat (for example, to send a message in a channel which is not yours), or invalid permissions used for the channel or group (caused by SendMediaRequest)
+2024-10-28 16:10:17,640 - ERROR - [!] Ошибка Chat admin privileges are required to do that in the specified chat (for example, to send a message in a channel which is not yours), or invalid permissions used for the channel or group (caused by SendMultiMediaRequest)
+2024-10-28 17:31:25,509 - ERROR - Неизвестная ошибка: Cannot use [] as file
+2024-10-28 17:31:26,021 - ERROR - Неизвестная ошибка: Cannot use [] as file
+2024-10-28 17:31:26,431 - ERROR - Неизвестная ошибка: Cannot use [] as file
+2024-10-28 17:31:27,249 - ERROR - Неизвестная ошибка: Cannot use [] as file
+2024-10-28 17:31:29,707 - ERROR - Неизвестная ошибка: Cannot use [] as file
+2024-10-28 17:31:30,118 - ERROR - Неизвестная ошибка: Cannot use [] as file
+2024-10-28 17:31:30,525 - ERROR - Неизвестная ошибка: Cannot use [] as file
+2024-10-28 17:31:31,038 - ERROR - Неизвестная ошибка: Cannot use [] as file
+2024-10-28 17:31:31,858 - ERROR - Неизвестная ошибка: Cannot use [] as file
+2024-10-28 17:31:32,573 - ERROR - Неизвестная ошибка: Cannot use [] as file
