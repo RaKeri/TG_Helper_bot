@@ -7,6 +7,7 @@ class DatabaseManager:
         """Инициализация подключения к БД."""
         self.connection = sqlite3.connect(db_name, check_same_thread=False)
         self.cursor = self.connection.cursor()
+        self.create_table()
 
     def close(self):
         """Закрытие подключения к БД."""

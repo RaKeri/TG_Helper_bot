@@ -22,25 +22,6 @@ def profile_keyboard():
         text="🔵Аккаунты",
         callback_data="account")
     )
-    builder.row(InlineKeyboardButton(
-        text="❓️Вопросы",
-        callback_data="answers")
-    )
-    return builder.as_markup()
-
-
-def answers_keyboard():
-    builder = InlineKeyboardBuilder()
-
-    builder.add(types.InlineKeyboardButton(
-        text="Как пользоваться?",
-        callback_data="howToUse_0")
-    )
-    builder.add(types.InlineKeyboardButton(
-        text="🔙Назад",
-        callback_data="profile")
-    )
-    builder.adjust(1)
     return builder.as_markup()
 
 

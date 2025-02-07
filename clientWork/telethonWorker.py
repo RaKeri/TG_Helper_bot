@@ -25,15 +25,19 @@ from telethon.tl.types import MessageMediaPhoto, MessageMediaDocument, DocumentA
     MessageMediaContact, Channel, Chat, InputPeerSelf
 
 from aiogram import Bot
+from aiogram.client.default import DefaultBotProperties
 from dotenv import load_dotenv
 
 from tools.translate import GoogleTranslator
 from tools.Converter import Converter
 
+from dotenv import load_dotenv
+load_dotenv()
+
 pathdir = os.path.dirname(os.path.abspath(__file__)).split("\\")[:-1]
 pathdir = "\\".join(pathdir) + "\\"
-api_id = 21628682
-api_hash = "26c7cd0800b6449c4f9bbd29d1c81f7b"
+api_id =  os.getenv("API_ID")
+api_hash =  os.getenv("API_TOKEN")
 timefreq = time.time()
 
 translator = GoogleTranslator()
@@ -45,7 +49,7 @@ env_path = os.path.join(pathdir, ".env")
 if os.path.exists(env_path):
     load_dotenv(env_path)
 
-bot = Bot(token=os.getenv("BOT_TOKEN"), parse_mode="HTML")
+bot = Bot(token=os.getenv("BOT_TOKEN"), default=DefaultBotProperties(parse_mode='HTML'))
 url_shorteners = []
 
 logger = logging.getLogger("my_logger")

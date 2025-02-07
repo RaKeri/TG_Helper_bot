@@ -21,14 +21,15 @@ from aiogram import Bot, Dispatcher, types, F
 from aiogram.enums import ChatMemberStatus
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardButton, InputMediaPhoto, FSInputFile
+from aiogram.types import InlineKeyboardButton, InputMediaPhoto, FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.client.default import DefaultBotProperties
 from telethon import TelegramClient, errors
 
 from clientWork.telethonWorker import startGrab
-from tools.checkActivate import check_license, get_device_id, checkUpdate
 from tools.createQR import generate_qr_code
 from tools.fsm import Grab, Auth
-from tools.keyboard import profile_keyboard, start_keyboard, generate_how_to_use_keyboard, answers_keyboard, \
+from tools.keyboard import profile_keyboard, start_keyboard, generate_how_to_use_keyboard, \
     all_accounts_keyboard, check_logs_keyboard, check_parsing_keyboard, start_add_account_keyboard
 from tools.uuidGen import UUID
 from tools.checkProxy import ProxyChecker
@@ -41,12 +42,10 @@ load_dotenv()
 
 pathdir = os.path.dirname(os.path.abspath(__file__)) + "\\"
 
-bot = Bot(token=os.getenv("BOT_TOKEN"), parse_mode="HTML")
+bot = Bot(token=os.getenv("BOT_TOKEN"), default=DefaultBotProperties(parse_mode='HTML'))
 
-
-api_id = 21628682
-api_hash = "26c7cd0800b6449c4f9bbd29d1c81f7b"
-Client_verison = "0.0.1"
+api_id =  os.getenv("API_ID")
+api_hash =  os.getenv("API_TOKEN")
 
 dp = Dispatcher()
 uuid_generator = UUID()
@@ -102,10 +101,6 @@ async def chat_member(message: types.Message):
           message.old_chat_member.status == ChatMemberStatus.MEMBER):
         db.update_user_status(user_id, 1)
 
-@dp.callback_query(F.data.split("_")[0] == "dont")
-async def dont(callback: types.CallbackQuery):
-    await callback.answer("Данная функция пока не работает", show_alert=True)
-    pass
 
 
 @dp.message(F.text == "/start")
@@ -142,68 +137,11 @@ def get_active_processes():
 async def profile(callback: types.CallbackQuery):
     await callback.answer()
     user = db.fetch_user(callback.from_user.id)
-    device_id = get_device_id()
-    lic = check_license(device_id)
-    data = datetime.datetime.fromtimestamp(int(lic))
     await callback.message.edit_text(f'''🤖 Профиль
 ➖➖➖➖➖➖➖➖➖➖
 🆔 <b>ID</b>: <code>{user[0]}</code>
-🔢 <b>Аккаунтов</b>: <code>{user[5]}</code>
-📆 <b>Лицензия до</b>: <code>{data.date()}</code>{get_active_processes()}
+🔢 <b>Аккаунтов</b>: <code>{user[5]}</code>{get_active_processes()}
 ''', reply_markup=profile_keyboard())
-
-
-
-
-@dp.callback_query(F.data.split("_")[0] == "answers")
-async def answers(callback: types.CallbackQuery):
-
-
-    try:
-        await callback.message.edit_text("Вопрос -- ответ:\n➖➖➖➖➖➖➖➖➖➖", reply_markup=answers_keyboard())
-    except Exception as e:
-
-        try:
-            await callback.message.delete()
-        except Exception as e:
-            logger.warning(f"Ошибка при удалении сообщения: {e}")
-        await callback.message.answer("Вопрос -- ответ:\n➖➖➖➖➖➖➖➖➖➖", reply_markup=answers_keyboard())
-
-@dp.callback_query(F.data.split("_")[0] == "howToUse")
-async def how_to_use(callback: types.CallbackQuery):
-    step = int(callback.data.split("_")[1])
-
-    photos = [
-        # ("AgACAgIAAxkBAANcZaQCJVK41uVSMR2Wa4aEudiV2a8AAkrTMRuAmiBJ0hWrCmcm_0MBAAMCAAN4AAM0BA",
-        #  "<b>1.</b> После регистрации вам будет доступна <b>пробная</b> подписка на <i><u>2 часа</u></i> подключить ее можно в разделе <b>\"ПОДПИСКА -> FREE\"</b>"),
-
-        ("AgACAgIAAxkBAANdZaQCKdK5Jw3RqWoT7tIeEEh7LOkAAkvTMRuAmiBJ1LABt0H295kBAAMCAAN4AAM0BA",
-         "<b>1.</b> Требуется добавить аккаунт с которого будете вести каналы, для этого нужно выполнить 5 простых действий"),
-
-        ("AgACAgIAAxkBAANeZaQCLmd9hbjto-HdfrQiTUgquGIAAkzTMRuAmiBJowYBmVR9MIUBAAMCAAN4AAM0BA",
-         "<b>2.</b> В итоге вам будет доступно меню управления аккаунтом."),
-
-        ("AgACAgIAAxkBAANfZaQCNUiKyYY3a9fMv8TTfeTIpisAAk3TMRuAmiBJZwQyWQABqS-aAQADAgADeAADNAQ",
-         "<b>3.</b> В Пункте 1 и 3 вам будет доступна настройка фильтров, а также нескольких параллельных задач.")
-    ]
-
-    keyboard = generate_how_to_use_keyboard(step)
-
-    if step == 0:
-        try:
-            await callback.message.delete()
-        except Exception as e:
-            logger.warning(f"Ошибка при удалении сообщения: {e}")
-        await callback.message.answer_photo(
-            photo=photos[step][0],
-            caption=photos[step][1],
-            reply_markup=keyboard
-        )
-    else:
-        media = InputMediaPhoto(media=photos[step][0], caption=photos[step][1])
-        await callback.message.edit_media(media=media, reply_markup=keyboard)
-
-
 
 
 @dp.callback_query(F.data.split("_")[0] == "account")
@@ -247,7 +185,6 @@ async def acc5(callback: types.CallbackQuery, state: FSMContext):
     builder.add(InlineKeyboardButton(text="2", callback_data="ActionAccount_2_" + callback.data.split("_")[1]))
     builder.add(InlineKeyboardButton(text="3", callback_data="ActionAccount_3_" + callback.data.split("_")[1]))
     builder.add(InlineKeyboardButton(text="4", callback_data="ActionAccount_4_" + callback.data.split("_")[1]))
-    builder.add(InlineKeyboardButton(text="5", callback_data="dont_" + callback.data.split("_")[1]))
     builder.row(InlineKeyboardButton(text=("Добавить прокси" if a[12] == None else "Изменить прокси"),
                                      callback_data="addProxy_" + callback.data.split("_")[1]),
                 InlineKeyboardButton(text="Завершить сессию", callback_data="quit_" + callback.data.split("_")[1]))
@@ -261,7 +198,7 @@ async def acc5(callback: types.CallbackQuery, state: FSMContext):
     await state.update_data(phone=callback.data.split("_")[1])
 
     await callback.message.edit_text(
-        f"Аккаунт (<i>{callback.data.split('_')[1]}</i>|<b>@{a[2]}</b>)\n➖➖➖➖➖➖➖➖➖➖\n🆕1. Пересылать <i><b>новые</b></i> посты\n💾2. Парсинг пользователей\n📤3. Переслать <i><b>старые</b></i> сообщения\n📤4. Скачать все <i><b>медиафайлы и текстовый</b></i> сообщения\n🤖<tg-spoiler>5. Автопостинг с помощью ИИ (в разработке)</tg-spoiler>",
+        f"Аккаунт (<i>{callback.data.split('_')[1]}</i>|<b>@{a[2]}</b>)\n➖➖➖➖➖➖➖➖➖➖\n🆕1. Пересылать <i><b>новые</b></i> посты\n💾2. Парсинг пользователей\n📤3. Переслать <i><b>старые</b></i> сообщения\n📤4. Скачать все <i><b>медиафайлы и текстовый</b></i> сообщения",
         reply_markup=builder.as_markup())
 
 @dp.callback_query(F.data.split("_")[0] == "downloadFileSession")
@@ -300,7 +237,7 @@ async def checkProxy(message: types.Message, state: FSMContext):
                                  reply_markup=builder.as_markup())
             return
 
-        await state.clearState()
+        await state.set_state()
         try:
             await message.delete()
         except Exception as e:
@@ -312,7 +249,7 @@ async def checkProxy(message: types.Message, state: FSMContext):
             logger.warning(f"Ошибка при удалении сообщения: {e}")
 
         await message.answer(s,  reply_markup=builder.as_markup())
-        await state.clearState()
+        await state.set_state()
         db.update_proxy(message.text.lower(), data["phone"])
         return
     else:
@@ -451,7 +388,7 @@ async def acc3(message: types.Message, state: FSMContext):
     else:
         await message.answer("Ты ввел ID в неправильном формате")
         return
-    await state.clearState()
+    await state.set_state()
     try:
         await message.delete()
     except Exception as e:
@@ -496,7 +433,7 @@ async def acc3(message: types.Message, state: FSMContext):
         i += 1
 
     await state.update_data(chooseActionFrom=ss)
-    await state.clearState()
+    await state.set_state()
     await state.set_state(Grab.enter_idTO)
     await bot.edit_message_text(chat_id=message.from_user.id, message_id=data["messageId"], text=
         "Выберите <b>В</b> как(ой|ие) канал/чат/группу, введите ID через пробел например (1 3 10 101)\n➖➖➖➖➖➖➖➖➖➖\n\n" + s,
@@ -526,7 +463,7 @@ async def acc2(message: types.Message, state: FSMContext):
         await message.delete()
     except Exception as e:
         logger.warning(f"Ошибка при удалении сообщения: {e}")
-    await state.clearState()
+    await state.set_state()
     if not "filters" in data:
         await state.update_data(filters=[])
         data = await state.get_data()
@@ -1068,44 +1005,14 @@ def format_time_difference(time_difference):
         return f"{months}м {days}д {hours}ч {minutes}м {seconds}с"
 
 
-async def checkSubs():
-    while True:
-        device_id = get_device_id()
-        if not check_license(device_id):
-            await bot.send_message(chat_id=os.getenv("ME_ID"), text="Работа софта завершена, лицензия истекла")
-            for p in multiprocessing.active_children():
-                p.terminate()
-            sys.exit(0)
-        await asyncio.sleep(3600)  # Проверка каждый час и при запуске
-
-async def checkU():
-    while True:
-        if os.access("./update.rar", os.F_OK):
-            return
-        ch = checkUpdate(Client_verison)
-        if ch:
-            try:
-                await bot.send_message(chat_id=os.getenv("ME_ID"), text="‼️<b><u>Скачано новое обновление</u></b>‼️\nСкопируйте файлы из архива \"<code>update.rar</code>\" в текущую папку с <b>заменой</b>.\n<tg-spoiler>После чего выполните перезапуск программы и удалите архив, для возможности дальнейших обновлений</tg-spoiler>")
-                return
-            except Exception as e:
-                logger.error(e)
-                pass
-        else:
-            await asyncio.sleep(86400)  # Проверка каждый день и при запуске в случае если обновление не найдено
-
 async def main():
 
-    asyncio.create_task(checkSubs())
-    asyncio.create_task(checkU())
     await dp.start_polling(bot)
 
 
 if __name__ == '__main__':
     try:
-        device_id = get_device_id()
-        if check_license(device_id):
-            asyncio.run(main())
+        asyncio.run(main())
     except KeyboardInterrupt as e:
         print("Бот завершен")
-
 
